@@ -20,16 +20,16 @@ cursor = connection.cursor()
 # Get student information
 name = input("Enter student name: ")
 age = int(input("Enter student age: "))
-height = float(input("Enter student height in meters: "))
+phone = input("Enter student phone number: ")
 city = input("Enter student city: ")
 
 # Insert student into the existing table
 query = """
-    INSERT INTO students (name, age, height, city)
-    VALUES (%s, %s, %s, %s)
+INSERT INTO students (name, age, phone, city)
+VALUES (%s, %s, %s, %s)
 """
 
-cursor.execute(query, (name, age, height, city))
+cursor.execute(query, (name, age, phone, city))
 
 connection.commit()
 
@@ -47,6 +47,5 @@ for student in students:
 
 # Close database connection
 cursor.close()
-connection.close()
-
+connection.close() 
 
