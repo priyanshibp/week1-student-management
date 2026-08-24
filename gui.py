@@ -296,6 +296,20 @@ def search_student():
     search_button.pack(pady=10)
 
     # --------------------------------------------------------
+    # Update Student Button
+    # --------------------------------------------------------
+
+    update_button = tk.Button(
+    window,
+    text="Update Student",
+    width=25,
+    command=update_student
+    )
+
+    update_button.pack(pady=10)
+
+
+    # --------------------------------------------------------
     # Back Button
     # --------------------------------------------------------
 
@@ -308,7 +322,481 @@ def search_student():
 
     back_button.pack(pady=10)
 
+# ============================================================
+# UPDATE STUDENT
+# ============================================================
 
+def update_student():
+    """
+    Page used to update an existing student's information.
+    """
+
+    # --------------------------------------------------------
+    # Remove the current Home Page
+    # --------------------------------------------------------
+
+    for widget in window.winfo_children():
+        widget.destroy()
+
+    # --------------------------------------------------------
+    # Page Title
+    # --------------------------------------------------------
+
+    title_label = tk.Label(
+        window,
+        text="Update Student",
+        font=("Arial", 22, "bold")
+    )
+
+    title_label.pack(pady=30)
+
+    # --------------------------------------------------------
+    # Student ID Label
+    # --------------------------------------------------------
+
+    id_label = tk.Label(
+        window,
+        text="Enter Student ID:"
+    )
+
+    id_label.pack()
+
+    # --------------------------------------------------------
+    # Student ID Input
+    # --------------------------------------------------------
+
+    id_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    id_entry.pack(pady=10)
+
+    # --------------------------------------------------------
+    # New Name Label
+    # --------------------------------------------------------
+
+    name_label = tk.Label(
+        window,
+        text="New Name:"
+    )
+
+    name_label.pack()
+
+    # --------------------------------------------------------
+    # New Name Input
+    # --------------------------------------------------------
+
+    name_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    name_entry.pack(pady=10)
+
+    # --------------------------------------------------------
+    # New Age Label
+    # --------------------------------------------------------
+
+    age_label = tk.Label(
+        window,
+        text="New Age:"
+    )
+
+    age_label.pack()
+
+    # --------------------------------------------------------
+    # New Age Input
+    # --------------------------------------------------------
+
+    age_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    age_entry.pack(pady=10)
+
+    # --------------------------------------------------------
+    # New City Label
+    # --------------------------------------------------------
+
+    city_label = tk.Label(
+        window,
+        text="New City:"
+    )
+
+    city_label.pack()
+
+    # --------------------------------------------------------
+    # New City Input
+    # --------------------------------------------------------
+
+    city_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    city_entry.pack(pady=10)
+
+    # --------------------------------------------------------
+    # New Phone Label
+    # --------------------------------------------------------
+
+    phone_label = tk.Label(
+        window,
+        text="New Phone:"
+    )
+
+    phone_label.pack()
+
+    # --------------------------------------------------------
+    # New Phone Input
+    # --------------------------------------------------------
+
+    phone_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    phone_entry.pack(pady=10)
+  # --------------------------------------------------------
+    # Update Student Function
+    # --------------------------------------------------------
+
+    def perform_update():
+
+        print("UPDATE BUTTON CLICKED")
+        """
+        Update the selected student's information
+        in the PostgreSQL database.
+        """
+
+        # Get values from the input fields
+        student_id = id_entry.get().strip()
+        name = name_entry.get().strip()
+        age = age_entry.get().strip()
+        city = city_entry.get().strip()
+        phone = phone_entry.get().strip()
+
+        # ----------------------------------------------------
+        # Check that all fields are filled
+        # ----------------------------------------------------
+
+        if (
+            student_id == ""
+            or name == ""
+            or age == ""
+            or city == ""
+            or phone == ""
+        ):
+            messagebox.showwarning(
+                "Input Required",
+                "Please fill in all fields."
+            )
+            return
+
+        # ----------------------------------------------------
+        # Check that Student ID and Age are numbers
+        # ----------------------------------------------------
+
+        if not student_id.isdigit():
+            messagebox.showwarning(
+                "Invalid Student ID",
+                "Student ID must be a number."
+            )
+            return
+
+        if not age.isdigit():
+            messagebox.showwarning(
+                "Invalid Age",
+                "Age must be a number."
+            )
+            return
+
+        try:
+
+            # Convert ID and age to integers
+            student_id_number = int(student_id)
+            age_number = int(age)
+
+            # ------------------------------------------------
+            # Connect to PostgreSQL
+            # ------------------------------------------------
+
+            connection = connect_database()
+
+            cursor = connection.cursor()
+
+            # ------------------------------------------------
+            # SQL UPDATE
+            # ------------------------------------------------
+
+            query = """
+                UPDATE students
+                SET name = %s,
+                    age = %s,
+                    city = %s,
+                    phone = %s
+                WHERE student_id = %s
+            """
+
+            cursor.execute(
+                query,
+                (
+                    name,
+                    age_number,
+                    city,
+                    phone,
+                    student_id_number
+                )
+            )
+
+            # ------------------------------------------------
+            # Save the changes
+            # ------------------------------------------------
+
+            connection.commit()
+
+            # Check whether a student was actually updated
+            if cursor.rowcount == 0:
+
+                messagebox.showwarning(
+                    "Not Found",
+                    "No student found with this ID."
+                )
+
+            else:
+
+                messagebox.showinfo(
+                    "Success",
+                    "Student updated successfully!"
+                )
+
+            # Close connection
+            cursor.close()
+            connection.close()
+
+        except Exception as error:
+
+            messagebox.showerror(
+                "Database Error",
+                str(error)
+            )
+
+    # --------------------------------------------------------
+    # Update Student Button
+    # --------------------------------------------------------
+
+    save_button = tk.Button(
+        window,
+        text="Update Student",
+        width=20,
+        command=perform_update
+    )
+
+    save_button.pack(pady=15)
+
+    # --------------------------------------------------------
+    # Back Button
+    # --------------------------------------------------------
+
+    back_button = tk.Button(
+        window,
+        text="Back",
+        width=20,
+        command=open_home_page
+    )
+
+    back_button.pack(pady=10)
+
+# ============================================================
+# DELETE STUDENT
+# ============================================================
+
+def delete_student():
+    """
+    Page used to delete a student from the database.
+    """
+
+    # --------------------------------------------------------
+    # Remove the current Home Page
+    # --------------------------------------------------------
+
+    for widget in window.winfo_children():
+        widget.destroy()
+
+    # --------------------------------------------------------
+    # Page Title
+    # --------------------------------------------------------
+
+    title_label = tk.Label(
+        window,
+        text="Delete Student",
+        font=("Arial", 22, "bold")
+    )
+
+    title_label.pack(pady=40)
+
+    # --------------------------------------------------------
+    # Student ID Label
+    # --------------------------------------------------------
+
+    id_label = tk.Label(
+        window,
+        text="Enter Student ID:"
+    )
+
+    id_label.pack(pady=5)
+
+    # --------------------------------------------------------
+    # Student ID Input
+    # --------------------------------------------------------
+
+    id_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    id_entry.pack(pady=10)
+
+    # --------------------------------------------------------
+    # Delete Function
+    # --------------------------------------------------------
+
+    def perform_delete():
+        """
+        Delete the selected student from PostgreSQL.
+        """
+
+        # Get Student ID from the input box
+        student_id = id_entry.get().strip()
+
+        # ----------------------------------------------------
+        # Check if Student ID was entered
+        # ----------------------------------------------------
+
+        if student_id == "":
+            messagebox.showwarning(
+                "Input Required",
+                "Please enter a Student ID."
+            )
+            return
+
+        # ----------------------------------------------------
+        # Check if Student ID is a number
+        # ----------------------------------------------------
+
+        if not student_id.isdigit():
+            messagebox.showwarning(
+                "Invalid Student ID",
+                "Student ID must be a number."
+            )
+            return
+
+        # Convert Student ID to integer
+        student_id_number = int(student_id)
+
+        # ----------------------------------------------------
+        # Confirmation message
+        # ----------------------------------------------------
+
+        confirm = messagebox.askyesno(
+            "Confirm Delete",
+            f"Are you sure you want to delete student ID {student_id_number}?"
+        )
+
+        # If user selects No, stop here
+        if not confirm:
+            return
+
+        try:
+
+            # ------------------------------------------------
+            # Connect to PostgreSQL
+            # ------------------------------------------------
+
+            connection = connect_database()
+
+            cursor = connection.cursor()
+
+            # ------------------------------------------------
+            # SQL DELETE
+            # ------------------------------------------------
+
+            query = """
+                DELETE FROM students
+                WHERE student_id = %s
+            """
+
+            cursor.execute(
+                query,
+                (student_id_number,)
+            )
+
+            # ------------------------------------------------
+            # Save the changes
+            # ------------------------------------------------
+
+            connection.commit()
+
+            # ------------------------------------------------
+            # Check whether a student was deleted
+            # ------------------------------------------------
+
+            if cursor.rowcount == 0:
+
+                messagebox.showwarning(
+                    "Not Found",
+                    "No student found with this ID."
+                )
+
+            else:
+
+                messagebox.showinfo(
+                    "Success",
+                    "Student deleted successfully!"
+                )
+
+                # Clear the input after successful deletion
+                id_entry.delete(0, tk.END)
+
+            # Close database connection
+            cursor.close()
+            connection.close()
+
+        except Exception as error:
+
+            messagebox.showerror(
+                "Database Error",
+                str(error)
+            )
+
+    # --------------------------------------------------------
+    # Delete Student Button
+    # --------------------------------------------------------
+
+    delete_button = tk.Button(
+        window,
+        text="Delete Student",
+        width=20,
+        command=perform_delete
+    )
+
+    delete_button.pack(pady=15)
+
+    # --------------------------------------------------------
+    # Back Button
+    # --------------------------------------------------------
+
+    back_button = tk.Button(
+        window,
+        text="Back",
+        width=20,
+        command=open_home_page
+    )
+
+    back_button.pack(pady=10)
+  
 # ============================================================
 # HOME PAGE
 # ============================================================
@@ -390,7 +878,8 @@ def open_home_page():
     update_button = tk.Button(
         window,
         text="Update Student",
-        width=25
+        width=25,
+         command=update_student
     )
 
     update_button.pack(pady=5)
@@ -402,7 +891,8 @@ def open_home_page():
     delete_button = tk.Button(
         window,
         text="Delete Student",
-        width=25
+        width=25,
+         command=delete_student
     )
 
     delete_button.pack(pady=5)
