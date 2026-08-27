@@ -295,19 +295,6 @@ def search_student():
 
     search_button.pack(pady=10)
 
-    # --------------------------------------------------------
-    # Update Student Button
-    # --------------------------------------------------------
-
-    update_button = tk.Button(
-    window,
-    text="Update Student",
-    width=25,
-    command=update_student
-    )
-
-    update_button.pack(pady=10)
-
 
     # --------------------------------------------------------
     # Back Button
@@ -608,7 +595,211 @@ def update_student():
     )
 
     back_button.pack(pady=10)
+# ============================================================
+# ADD STUDENT
+# ============================================================
 
+def add_student():
+    # Clear current page
+    for widget in window.winfo_children():
+        widget.destroy()
+
+    # --------------------------------------------------------
+    # Page Title
+    # --------------------------------------------------------
+
+    title_label = tk.Label(
+        window,
+        text="Add Student",
+        font=("Arial", 22, "bold")
+    )
+
+    title_label.pack(pady=25)
+
+    # --------------------------------------------------------
+    # Student ID
+    # --------------------------------------------------------
+
+    id_label = tk.Label(
+        window,
+        text="Student ID:"
+    )
+
+    id_label.pack(pady=5)
+
+    id_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    id_entry.pack(pady=5)
+
+    # --------------------------------------------------------
+    # Name
+    # --------------------------------------------------------
+
+    name_label = tk.Label(
+        window,
+        text="Name:"
+    )
+
+    name_label.pack(pady=5)
+
+    name_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    name_entry.pack(pady=5)
+
+    # --------------------------------------------------------
+    # Age
+    # --------------------------------------------------------
+
+    age_label = tk.Label(
+        window,
+        text="Age:"
+    )
+
+    age_label.pack(pady=5)
+
+    age_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    age_entry.pack(pady=5)
+
+    # --------------------------------------------------------
+    # City
+    # --------------------------------------------------------
+
+    city_label = tk.Label(
+        window,
+        text="City:"
+    )
+
+    city_label.pack(pady=5)
+
+    city_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    city_entry.pack(pady=5)
+
+    # --------------------------------------------------------
+    # Phone
+    # --------------------------------------------------------
+
+    phone_label = tk.Label(
+        window,
+        text="Phone:"
+    )
+
+    phone_label.pack(pady=5)
+
+    phone_entry = tk.Entry(
+        window,
+        width=30
+    )
+
+    phone_entry.pack(pady=5)
+
+    # --------------------------------------------------------
+    # Save Student
+    # --------------------------------------------------------
+
+    def save_student():
+
+        student_id = id_entry.get()
+        name = name_entry.get()
+        age = age_entry.get()
+        city = city_entry.get()
+        phone = phone_entry.get()
+
+        if not student_id or not name or not age or not city or not phone:
+            messagebox.showwarning(
+                "Missing Information",
+                "Please fill in all fields."
+            )
+            return
+
+        try:
+
+            student_id = int(student_id)
+            age = int(age)
+
+            connection = connect_database()
+            cursor = connection.cursor()
+
+            query = """
+                INSERT INTO students
+                (student_id, name, age, city, phone)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+
+            values = (
+                student_id,
+                name,
+                age,
+                city,
+                phone
+            )
+
+            cursor.execute(query, values)
+
+            connection.commit()
+
+            cursor.close()
+            connection.close()
+
+            messagebox.showinfo(
+                "Success",
+                "Student added successfully."
+            )
+
+            id_entry.delete(0, tk.END)
+            name_entry.delete(0, tk.END)
+            age_entry.delete(0, tk.END)
+            city_entry.delete(0, tk.END)
+            phone_entry.delete(0, tk.END)
+
+        except ValueError:
+
+            messagebox.showerror(
+                "Invalid Input",
+                "Student ID and Age must be numbers."
+            )
+
+        except Exception as error:
+
+            messagebox.showerror(
+                "Database Error",
+                str(error)
+            )
+
+    add_button = tk.Button(
+        window,
+        text="Add Student",
+        width=20,
+        command=save_student
+    )
+
+    add_button.pack(pady=15)
+
+    # --------------------------------------------------------
+    # Back Button
+    # --------------------------------------------------------
+
+    back_button = tk.Button(
+        window,
+        text="Back",
+        width=20,
+        command=open_home_page
+    )
+
+    back_button.pack(pady=10)
 # ============================================================
 # DELETE STUDENT
 # ============================================================
@@ -796,6 +987,267 @@ def delete_student():
     )
 
     back_button.pack(pady=10)
+
+# ============================================================
+# REPORTS
+# ============================================================
+
+def reports_page():
+    """
+    Display student reports using SQL aggregate functions,
+    GROUP BY, and HAVING.
+    """
+
+    # --------------------------------------------------------
+    # Clear current page
+    # --------------------------------------------------------
+
+    for widget in window.winfo_children():
+        widget.destroy()
+
+    # --------------------------------------------------------
+    # Page Title
+    # --------------------------------------------------------
+
+    title_label = tk.Label(
+        window,
+        text="Student Reports",
+        font=("Arial", 22, "bold")
+    )
+
+    title_label.pack(pady=25)
+
+    # --------------------------------------------------------
+    # Get Overall Statistics
+    # COUNT, AVG, MIN, MAX
+    # --------------------------------------------------------
+
+    try:
+
+        connection = connect_database()
+        cursor = connection.cursor()
+
+        query = """
+            SELECT
+                COUNT(*),
+                AVG(age),
+                MIN(age),
+                MAX(age)
+            FROM students
+        """
+
+        cursor.execute(query)
+
+        result = cursor.fetchone()
+
+        total_students = result[0]
+        average_age = result[1]
+        youngest_age = result[2]
+        oldest_age = result[3]
+
+        cursor.close()
+        connection.close()
+
+        # ----------------------------------------------------
+        # Total Students
+        # ----------------------------------------------------
+
+        total_label = tk.Label(
+            window,
+            text=f"Total Students: {total_students}",
+            font=("Arial", 15)
+        )
+
+        total_label.pack(pady=5)
+
+        # ----------------------------------------------------
+        # Average Age
+        # ----------------------------------------------------
+
+        if average_age is not None:
+            average_label = tk.Label(
+                window,
+                text=f"Average Age: {average_age:.2f}",
+                font=("Arial", 15)
+            )
+        else:
+            average_label = tk.Label(
+                window,
+                text="Average Age: No data",
+                font=("Arial", 15)
+            )
+
+        average_label.pack(pady=5)
+
+        # ----------------------------------------------------
+        # Youngest Age
+        # ----------------------------------------------------
+
+        youngest_label = tk.Label(
+            window,
+            text=f"Youngest Age: {youngest_age}",
+            font=("Arial", 15)
+        )
+
+        youngest_label.pack(pady=5)
+
+        # ----------------------------------------------------
+        # Oldest Age
+        # ----------------------------------------------------
+
+        oldest_label = tk.Label(
+            window,
+            text=f"Oldest Age: {oldest_age}",
+            font=("Arial", 15)
+        )
+
+        oldest_label.pack(pady=5)
+
+    except Exception as error:
+
+        messagebox.showerror(
+            "Database Error",
+            str(error)
+        )
+
+        return
+
+    # --------------------------------------------------------
+    # Students By City
+    # GROUP BY
+    # --------------------------------------------------------
+
+    city_title = tk.Label(
+        window,
+        text="Students By City",
+        font=("Arial", 17, "bold")
+    )
+
+    city_title.pack(pady=(20, 5))
+
+    try:
+
+        connection = connect_database()
+        cursor = connection.cursor()
+
+        query = """
+            SELECT city, COUNT(*)
+            FROM students
+            GROUP BY city
+            ORDER BY city
+        """
+
+        cursor.execute(query)
+
+        city_results = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        if len(city_results) == 0:
+
+            city_label = tk.Label(
+                window,
+                text="No city data available.",
+                font=("Arial", 13)
+            )
+
+            city_label.pack(pady=5)
+
+        else:
+
+            for city, count in city_results:
+
+                city_label = tk.Label(
+                    window,
+                    text=f"{city}: {count} student(s)",
+                    font=("Arial", 13)
+                )
+
+                city_label.pack(pady=2)
+
+    except Exception as error:
+
+        messagebox.showerror(
+            "Database Error",
+            str(error)
+        )
+
+    # --------------------------------------------------------
+    # Cities With More Than 1 Student
+    # HAVING
+    # --------------------------------------------------------
+
+    having_title = tk.Label(
+        window,
+        text="Cities With More Than 1 Student",
+        font=("Arial", 17, "bold")
+    )
+
+    having_title.pack(pady=(15, 5))
+
+    try:
+
+        connection = connect_database()
+        cursor = connection.cursor()
+
+        query = """
+            SELECT city, COUNT(*)
+            FROM students
+            GROUP BY city
+            HAVING COUNT(*) > 1
+            ORDER BY city
+        """
+
+        cursor.execute(query)
+
+        having_results = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        if len(having_results) == 0:
+
+            having_label = tk.Label(
+                window,
+                text="No cities have more than 1 student.",
+                font=("Arial", 13)
+            )
+
+            having_label.pack(pady=5)
+
+        else:
+
+            for city, count in having_results:
+
+                having_label = tk.Label(
+                    window,
+                    text=f"{city}: {count} student(s)",
+                    font=("Arial", 13)
+                )
+
+                having_label.pack(pady=2)
+
+    except Exception as error:
+
+        messagebox.showerror(
+            "Database Error",
+            str(error)
+        )
+
+    # --------------------------------------------------------
+    # Back Button
+    # --------------------------------------------------------
+
+    back_button = tk.Button(
+        window,
+        text="Back",
+        width=20,
+        command=open_home_page
+    )
+
+    back_button.pack(pady=20)
+
   
 # ============================================================
 # HOME PAGE
@@ -866,7 +1318,8 @@ def open_home_page():
     add_button = tk.Button(
         window,
         text="Add Student",
-        width=25
+        width=25,
+        command=add_student
     )
 
     add_button.pack(pady=5)
@@ -896,6 +1349,20 @@ def open_home_page():
     )
 
     delete_button.pack(pady=5)
+
+
+    # --------------------------------------------------------
+    # Reports Button    
+    # --------------------------------------------------------
+
+    reports_button = tk.Button(
+    window,
+    text="Reports",
+    width=25,
+    command=reports_page
+    )
+
+    reports_button.pack(pady=5)
 
     # --------------------------------------------------------
     # Logout Button
