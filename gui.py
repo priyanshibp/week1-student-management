@@ -1010,12 +1010,12 @@ def reports_page():
     # --------------------------------------------------------
 
     title_label = tk.Label(
-        window,
-        text="Student Reports",
-        font=("Arial", 22, "bold")
+    window,
+    text="Student Reports",
+    font=("Arial", 18, "bold")
     )
 
-    title_label.pack(pady=25)
+    title_label.pack(pady=10)
 
     # --------------------------------------------------------
     # Get Overall Statistics
@@ -1055,10 +1055,10 @@ def reports_page():
         total_label = tk.Label(
             window,
             text=f"Total Students: {total_students}",
-            font=("Arial", 15)
+            font=("Arial", 12)
         )
 
-        total_label.pack(pady=5)
+        total_label.pack(pady=2)
 
         # ----------------------------------------------------
         # Average Age
@@ -1077,7 +1077,7 @@ def reports_page():
                 font=("Arial", 15)
             )
 
-        average_label.pack(pady=5)
+        average_label.pack(pady=2)
 
         # ----------------------------------------------------
         # Youngest Age
@@ -1089,7 +1089,7 @@ def reports_page():
             font=("Arial", 15)
         )
 
-        youngest_label.pack(pady=5)
+        youngest_label.pack(pady=2)
 
         # ----------------------------------------------------
         # Oldest Age
@@ -1101,7 +1101,7 @@ def reports_page():
             font=("Arial", 15)
         )
 
-        oldest_label.pack(pady=5)
+        oldest_label.pack(pady=2)
 
     except Exception as error:
 
@@ -1120,10 +1120,10 @@ def reports_page():
     city_title = tk.Label(
         window,
         text="Students By City",
-        font=("Arial", 17, "bold")
+        font=("Arial", 14, "bold")
     )
 
-    city_title.pack(pady=(20, 5))
+    city_title.pack(pady=(8, 3))
 
     try:
 
@@ -1149,10 +1149,10 @@ def reports_page():
             city_label = tk.Label(
                 window,
                 text="No city data available.",
-                font=("Arial", 13)
+                font=("Arial", 11)
             )
 
-            city_label.pack(pady=5)
+            city_label.pack(pady=2)
 
         else:
 
@@ -1164,7 +1164,7 @@ def reports_page():
                     font=("Arial", 13)
                 )
 
-                city_label.pack(pady=2)
+                city_label.pack(pady=1)
 
     except Exception as error:
 
@@ -1181,10 +1181,10 @@ def reports_page():
     having_title = tk.Label(
         window,
         text="Cities With More Than 1 Student",
-        font=("Arial", 17, "bold")
+        font=("Arial", 13, "bold")
     )
 
-    having_title.pack(pady=(15, 5))
+    having_title.pack(pady=(8, 3))
 
     try:
 
@@ -1235,6 +1235,126 @@ def reports_page():
             str(error)
         )
 
+     # --------------------------------------------------------
+    # Export Report To Text File
+    # --------------------------------------------------------
+
+    def export_report():
+
+        try:
+
+            connection = connect_database()
+            cursor = connection.cursor()
+
+            # Get overall statistics
+            cursor.execute("""
+                SELECT
+                    COUNT(*),
+                    AVG(age),
+                    MIN(age),
+                    MAX(age)
+                FROM students
+            """)
+
+            result = cursor.fetchone()
+
+            total_students = result[0]
+            average_age = result[1]
+            youngest_age = result[2]
+            oldest_age = result[3]
+
+            # Get students by city
+            cursor.execute("""
+                SELECT city, COUNT(*)
+                FROM students
+                GROUP BY city
+                ORDER BY city
+            """)
+
+            city_results = cursor.fetchall()
+
+            # Get cities with more than 1 student
+            cursor.execute("""
+                SELECT city, COUNT(*)
+                FROM students
+                GROUP BY city
+                HAVING COUNT(*) > 1
+                ORDER BY city
+            """)
+
+            having_results = cursor.fetchall()
+
+            cursor.close()
+            connection.close()
+
+            # Create text report
+            with open("student_report.txt", "w") as file:
+
+                file.write("STUDENT MANAGEMENT REPORT\n")
+                file.write("============================\n\n")
+
+                file.write("OVERALL STATISTICS\n")
+                file.write("----------------------------\n")
+                file.write(f"Total Students: {total_students}\n")
+
+                if average_age is not None:
+                    file.write(f"Average Age: {average_age:.2f}\n")
+                else:
+                    file.write("Average Age: No data\n")
+
+                file.write(f"Youngest Age: {youngest_age}\n")
+                file.write(f"Oldest Age: {oldest_age}\n\n")
+
+                file.write("STUDENTS BY CITY\n")
+                file.write("----------------------------\n")
+
+                for city, count in city_results:
+                    file.write(
+                        f"{city}: {count} student(s)\n"
+                    )
+
+                file.write("\n")
+
+                file.write("CITIES WITH MORE THAN 1 STUDENT\n")
+                file.write("----------------------------\n")
+
+                if len(having_results) == 0:
+
+                    file.write(
+                        "No cities have more than 1 student.\n"
+                    )
+
+                else:
+
+                    for city, count in having_results:
+                        file.write(
+                            f"{city}: {count} student(s)\n"
+                        )
+
+            messagebox.showinfo(
+                "Report Exported",
+                "Student report saved successfully as student_report.txt"
+            )
+
+        except Exception as error:
+
+            messagebox.showerror(
+                "Export Error",
+                str(error)
+            )
+
+    # --------------------------------------------------------
+    # Export Report Button
+    # --------------------------------------------------------
+
+    export_button = tk.Button(
+        window,
+        text="Export Report",
+        width=20,
+        command=export_report
+    )
+
+    export_button.pack(pady=5)
     # --------------------------------------------------------
     # Back Button
     # --------------------------------------------------------
@@ -1246,7 +1366,7 @@ def reports_page():
         command=open_home_page
     )
 
-    back_button.pack(pady=20)
+    back_button.pack(pady=5)
 
   
 # ============================================================
@@ -1378,9 +1498,6 @@ def open_home_page():
     logout_button.pack(pady=20)
 
 
-# ============================================================
-# VIEW STUDENTS
-# ============================================================
 
 # ============================================================
 # VIEW STUDENTS
